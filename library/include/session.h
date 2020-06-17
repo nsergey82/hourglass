@@ -3,24 +3,29 @@
 #include <functional>
 
 #ifdef __cplusplus
-typedef std::function<void (int)> SessionCB; // public side type
+
+typedef std::function<void (int)> SessionCB; // public side C++ callback type
+
+// Generic dispatcher
+template<typename Impl, typename Opaque, typename... Args>
+void dispatchAny(Opaque* cb, Args... args) {
+    (*reinterpret_cast<Impl* >(cb))(std::forward<Args>(args)...);
+}
+
 extern "C" {
 #endif
 
 struct Session_t;
 
-// C layer
 struct Session_cb_t; // opaque callback type for session
 
-// dispatcher
-inline void sessionHandlerDispatcher(Session_cb_t* cb, int v) {
-    (*reinterpret_cast<SessionCB* >(cb))(v);
-}
-
+// public side C callback
 typedef void (*SessionHandlerDispatcherPtr)(Session_cb_t*, int);
 
 int Session_create  (Session_t **handle);
-int Session_create_f(Session_t **handle, SessionHandlerDispatcherPtr dispatcher, Session_cb_t* fromUser);
+int Session_create_f(Session_t **handle,
+                     SessionHandlerDispatcherPtr dispatcher,
+                     Session_cb_t* fromUser);
 int Session_copy    (const Session_t *src, Session_t **dest);
 int Session_destroy (Session_t *handle);
 int Session_print   (const Session_t *handle);
@@ -29,7 +34,10 @@ int Session_call    (Session_t *handle);
 }
 #endif
 
+#include "dispatch.h"
+
 #ifdef __cplusplus
+
 #include <stdexcept>
 #include <cassert>
 #include <functional>
@@ -53,7 +61,7 @@ public:
 };
 
 inline Session::Session() {
-    if(Session_create(&handle))
+    if(HG_CALL_SESSION_CREATE((Session_t**)&handle))
         throw std::runtime_error("Failed in ctor");
 }
 
@@ -79,7 +87,7 @@ inline void Session::call() {
 inline Session::Session(const SessionCB& fromUser) : cb(fromUser){
     if(Session_create_f(
             &handle,
-            &sessionHandlerDispatcher,
+            &dispatchAny<SessionCB, Session_cb_t>,
             reinterpret_cast<Session_cb_t*>(&cb)))
         throw std::runtime_error("Failed in cb ctor");
 }

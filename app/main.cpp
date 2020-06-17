@@ -1,5 +1,6 @@
 #include "profile.h"
 #include "session.h"
+#include "id.h"
 #include <iostream>
 
 
@@ -17,4 +18,7 @@ int main(int, char**) {
     HG::Session session(cb);
     HG::Session sessionAlias(session);
     sessionAlias.call();
+
+    HG::Id id;
+    id.applyLogic();
 }

@@ -8,5 +8,5 @@ add_library(hgapi SHARED
 
         include/profile.h
         include/session.h
-        )
+        include/dispatch.h src/dispatch.cpp include/id.h src/id.cpp)
 target_include_directories(hgapi PUBLIC include)

@@ -18,7 +18,9 @@ struct Profile_t;
   int Profile_print  (const Profile_t *handle);
 #ifdef __cplusplus  
 } 
-#endif 
+#endif
+
+#include "dispatch.h"
 
 #ifdef __cplusplus  
 #include <stdexcept>
@@ -42,12 +44,13 @@ public:
 };
 
 inline Profile::Profile(const std::string& n, int a) {
-  if(Profile_create(&handle, n.c_str(), a))
-    throw std::runtime_error("Failed in ctor");
+  if(HG_CALL_PROFILE_CREATE(&handle, n.c_str(), a))
+        throw std::runtime_error("Failed in ctor");
 }
 
 inline Profile::~Profile() {
-  assert(0 == Profile_destroy(handle));
+    int rc = Profile_destroy(handle);
+    assert(0 == rc);
 }
 
 inline Profile::Profile(const Profile& other) {
@@ -60,21 +63,21 @@ inline void Profile::setAge(int a) {
     throw std::runtime_error("Failed setting age");  
 }
 
-int Profile::getAge() const {
+inline int Profile::getAge() const {
     int age;
     if(Profile_getAge(handle, &age))
         throw std::runtime_error("Failed getting age");
     return age;
 }
 
-std::string Profile::getName() const {
+inline std::string Profile::getName() const {
     const char* name;
     if(Profile_getName(handle, &name))
         throw std::runtime_error("Failed getting name");
     return std::string(name);
 }
 
-void Profile::setName(const std::string& name) {
+inline void Profile::setName(const std::string& name) {
     if(Profile_setName(handle, name.c_str()))
         throw std::runtime_error("Failed setting name");
 }
