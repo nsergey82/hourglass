@@ -25,12 +25,20 @@ template<typename T>
 struct ConstPreserve {
     typedef typename ToImpl<T>::tag tag;
     typedef typename ToImpl<T>::impl impl;
+    static impl* rep(T* ptr) {
+        ShPtrRep *rep = reinterpret_cast<ShPtrRep *>(ptr);
+        return rep->asType<impl>();
+    }
 };
 
 template<typename T>
 struct ConstPreserve<const T> {
     typedef typename ToImpl<T>::tag tag;
     typedef const typename ToImpl<T>::impl impl;
+    static impl* rep(const T* ptr) {
+        const ShPtrRep *rep = reinterpret_cast<const ShPtrRep *>(ptr);
+        return rep->asType<impl>();
+    }
 };
 
 template<typename Opaque>
@@ -40,8 +48,7 @@ static typename ConstPreserve<Opaque>::impl *ptr(Opaque *p, Raw) {
 
 template<typename Opaque>
 static typename ConstPreserve<Opaque>::impl *ptr(Opaque *p, RefCount) {
-    ShPtrRep* rep = reinterpret_cast<ShPtrRep*>(p);
-    return rep->asType<typename ConstPreserve<Opaque>::impl>();
+    return ConstPreserve<Opaque>::rep(p);
 }
 
 template<typename Opaque>
@@ -50,12 +57,17 @@ static ShPtrRep *repr(Opaque *p, RefCount) {
     return rep;
 }
 
+
 template<typename Opaque>
 static ShPtrRep *clone(Opaque *p, RefCount) {
+    static_assert(
+            !std::is_const<Opaque>::value,
+            "Will not be able to bump ref. count of const");
     auto rep = repr(p, RefCount());
     ++rep->refCount;
     return rep;
 }
+
 
 template<typename Opaque>
 static ShPtrRep *clone(Opaque *p) {

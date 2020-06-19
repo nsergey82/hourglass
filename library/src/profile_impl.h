@@ -54,12 +54,11 @@ public:
     }
 };
 
-
+// Specialize opaque->impl and impl->opaque type maps
 template<>
 struct HgHandles::ToImpl<Profile_t>
 : public HgHandles::TypeConverterMeta<Profile_t, HG::ProfileImpl, HgHandles::Raw> {
 };
-
 template<>
 struct HgHandles::FromImpl<HG::ProfileImpl>
         : public HgHandles::TypeConverterMeta<Profile_t, HG::ProfileImpl, HgHandles::Raw> {

@@ -20,6 +20,10 @@ struct ShPtrRep {
     T* asType() {
         return reinterpret_cast<T*>(ptr);
     }
+    template <typename T>
+    const T* asType() const {
+        return reinterpret_cast<const T*>(ptr);
+    }
 };
 
 template<typename T>
