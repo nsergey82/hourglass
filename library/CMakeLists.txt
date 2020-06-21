@@ -5,8 +5,13 @@ add_library(hgapi SHARED
         src/session.cpp
         src/profile_impl.h
         src/session_impl.h
+        src/session_b.cpp
+        src/dispatch.cpp
+        src/id.cpp
 
         include/profile.h
         include/session.h
-        include/dispatch.h src/dispatch.cpp include/id.h src/id.cpp)
+        include/session_b.h
+        include/dispatch.h
+        include/id.h )
 target_include_directories(hgapi PUBLIC include)

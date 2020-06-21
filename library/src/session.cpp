@@ -8,7 +8,7 @@
 
 int HG::SessionImpl::s_id(0);
 
-int Session_create(::Session_t **handle) {
+int Session_create(Session_t **handle) {
     *handle = HgHandles::release(make_myshared<HG::SessionImpl>());
     return 0;
 }
@@ -39,7 +39,7 @@ int Session_call(Session_t *handle) {
     return 0;
 }
 
-int Session_print(const Session_t *handle, streamcb cb, void* stream) {
+int Session_print(const Session_t *handle, streamcb cb, stream_t* stream) {
     std::stringstream sstream;
     HgHandles::ptr(handle)->print(sstream);
     std::string msg = sstream.str();

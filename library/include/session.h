@@ -13,13 +13,14 @@ extern "C" {
 #endif
 
 struct Session_t;
-
+// Properly name all types that travel through hourglass, don't just void*
 struct Session_cb_t; // opaque callback type for session
+struct stream_t; // opaque type for streams
 
 // public side C callback, takes an int and propagates it to user callback
 typedef void (*SessionHandlerCallerPtr)(Session_cb_t*, int);
 // public side C callback to stream data via type erased stream
-typedef int (*streamcb)(const char *data, int length, void *stream);
+typedef int (*streamcb)(const char *data, int length, stream_t *stream);
 
 
 int Session_create  (Session_t **handle);
@@ -28,7 +29,7 @@ int Session_create_f(Session_t **handle,
                      Session_cb_t* fromUser);
 int Session_copy    (const Session_t *src, Session_t **dest);
 int Session_destroy (Session_t *handle);
-int Session_print   (const Session_t *handle, streamcb cb, void* stream);
+int Session_print   (const Session_t *handle, streamcb cb, stream_t* stream);
 int Session_call    (Session_t *handle);
 #ifdef __cplusplus
 }
@@ -81,9 +82,9 @@ inline void Session::call() {
 }
 
 
-// Generic stream writer: write to stream out, given via void*
+// Generic stream writer: write to type erased stream out
 template<typename Stream>
-int streamOut(const char *data, int length, void* stream) {
+int streamOut(const char *data, int length, stream_t* stream) {
     reinterpret_cast<Stream*>(stream)->write(data, length);
     return 0;
 }
@@ -105,7 +106,7 @@ inline Session::Session(const SessionCB& fromUser) : cb(fromUser){
 }
 
 inline void Session::print(std::ostream& out) const {
-    Session_print(handle, streamOut<std::ostream>, (void*)&out);
+    Session_print(handle, streamOut<std::ostream>, (stream_t*)&out);
 }
 
 }
