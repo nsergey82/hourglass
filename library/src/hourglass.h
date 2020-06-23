@@ -92,4 +92,10 @@ static typename FromImpl<Impl>::opaque *release(ShPtr<Impl> p) {
 
 };
 
+// Generic caller of an Impl callback provided via opaque handle
+template<typename Impl, typename Opaque, typename... Args>
+void dispatchAny(Opaque* cb, Args... args) {
+    (*reinterpret_cast<Impl* >(cb))(std::forward<Args>(args)...);
+}
+
 #endif

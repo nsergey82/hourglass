@@ -45,3 +45,8 @@ int Session_print(const Session_t *handle, streamcb cb, stream_t* stream) {
     std::string msg = sstream.str();
     return cb(msg.c_str(), msg.size(), stream);
 }
+
+
+void sessionDispatch(Session_cb_t* cb, int v) {
+    dispatchAny<SessionCB, Session_cb_t>(cb, v);
+}

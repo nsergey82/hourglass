@@ -8,7 +8,6 @@
 // public side C++ callback type
 typedef std::function<void (int)> SessionCB;
 
-
 extern "C" {
 #endif
 
@@ -21,6 +20,9 @@ struct stream_t; // opaque type for streams
 typedef void (*SessionHandlerCallerPtr)(Session_cb_t*, int);
 // public side C callback to stream data via type erased stream
 typedef int (*streamcb)(const char *data, int length, stream_t *stream);
+
+// this will call the correct callback
+void sessionDispatch(Session_cb_t* cb, int v);
 
 
 int Session_create  (Session_t **handle);
@@ -89,18 +91,10 @@ int streamOut(const char *data, int length, stream_t* stream) {
     return 0;
 }
 
-
-// Generic caller of an Impl callback provided via opaque handle
-template<typename Impl, typename Opaque, typename... Args>
-void dispatchAny(Opaque* cb, Args... args) {
-    (*reinterpret_cast<Impl* >(cb))(std::forward<Args>(args)...);
-}
-
-
 inline Session::Session(const SessionCB& fromUser) : cb(fromUser){
     if(Session_create_f(
             &handle,
-            &dispatchAny<SessionCB, Session_cb_t>,
+            &sessionDispatch,
             reinterpret_cast<Session_cb_t*>(&cb)))
         throw std::runtime_error("Failed in cb ctor");
 }

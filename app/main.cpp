@@ -2,6 +2,7 @@
 #include "session.h"
 #include "session_b.h"
 #include "id.h"
+
 #include <iostream>
 
 
@@ -26,9 +27,9 @@ int main(int, char**) {
     sessionAlias.call();
 
     // `sessionAlias.call()` conceptually the same as:
-    Session_cb_t *cbptr = reinterpret_cast<Session_cb_t*>(&cb);
-    SessionHandlerCallerPtr  caller = &HG::dispatchAny<decltype(cb)>;
-    caller(cbptr, 42);
+    //Session_cb_t *cbptr = reinterpret_cast<Session_cb_t*>(&cb);
+    //SessionHandlerCallerPtr  caller = &dispatchAny<decltype(cb), Session_cb_t>;
+    //caller(cbptr, 42);
 
     HG::SessionB sessionB;
     HG::SessionB sessionBAlias(sessionB);
