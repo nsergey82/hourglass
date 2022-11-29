@@ -93,6 +93,9 @@ static typename FromImpl<Impl>::opaque *release(ShPtr<Impl> p) {
 };
 
 // Generic caller of an Impl callback provided via opaque handle
+// Note: we can't simply store a pointer to a concrete instance of this and call it from C
+// as it is not guaranteed on all platforms that it will use the same calling conventions.
+// We must always wrap it in a strictly C function
 template<typename Impl, typename Opaque, typename... Args>
 void dispatchAny(Opaque* cb, Args... args) {
     (*reinterpret_cast<Impl* >(cb))(std::forward<Args>(args)...);
